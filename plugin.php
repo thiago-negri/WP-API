@@ -76,6 +76,63 @@ function register_json_route( $namespace, $route, $args = array(), $override = f
 	$wp_json_server->register_route( $full_route, $args, $override );
 }
 
+
+/**
+ * Register a new field on an existing WordPress object type
+ * 
+ * @param  string|array $object_type "post"|"term"|"comment" etc
+ * @param  string $attribute   The attribute name
+ * @param  array  $args        
+ * @return bool|wp_error
+ */
+function register_api_field( $object_type, $attribute, $args = array() ) {
+
+	$defaults = array(
+		'get_callback'    => null,
+		'update_callback' => null,
+		'delete_callback' => null,
+		'schema'          => null,
+	);
+
+	$args = wp_parse_args( $args, $defaults );
+
+	global $wp_json_additional_fields;
+
+	$object_types = (array) $object_type;
+
+	foreach ( $object_types as $object_type ) {
+		$wp_json_additional_fields[$object_type][$attribute] = $args;	
+	} 
+}
+
+/**
+ * Add any registered additional fields to any response
+ *
+ * @param object The object being filtered
+ * @return object The object with additional fields added
+ */
+function json_api_add_additional_fields_to_response( $object ) {
+
+	global $wp_json_additional_fields;
+	$filter = current_filter();
+	$object_type = str_replace( 'json_prepare_', '', $filter );
+
+	if ( ! isset( $wp_json_additional_fields[$object_type] ) ) {
+		return;
+	}
+
+	foreach ( $wp_json_additional_fields[$object_type] as $attribute => $additional_field ) {
+
+		if ( ! $additional_field['get_callback'] ) {
+			continue;
+		}
+
+		$object[$attribute] = call_user_func( $additional_field['get_callback'], $object );
+	}
+
+	return $object;
+}
+
 /**
  * Add the extra Post Type registration arguments we need
  * These attributes will eventually be committed to core.
