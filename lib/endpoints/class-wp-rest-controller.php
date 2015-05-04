@@ -199,8 +199,8 @@ abstract class WP_REST_Controller {
 				$endpoint_args[ $field_id ]['required'] = true;
 			}
 
-			if ( ! empty( $params['arg_options'] ) ) {
-				$endpoint_args = array_merge( $endpoint_args, $params['arg_options'] );
+			if ( ! empty( $params['_arg_options'] ) ) {
+				$endpoint_args = array_merge( $endpoint_args, $params['_arg_options'] );
 			}
 		}
 
