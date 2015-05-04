@@ -198,6 +198,10 @@ abstract class WP_REST_Controller {
 			if ( $add_required_flag && ! empty( $params['required'] ) ) {
 				$endpoint_args[ $field_id ]['required'] = true;
 			}
+
+			if ( ! empty( $params['arg_options'] ) ) {
+				$endpoint_args = array_merge( $endpoint_args, $params['arg_options'] );
+			}
 		}
 
 		return $endpoint_args;
